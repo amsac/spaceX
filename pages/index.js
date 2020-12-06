@@ -3,6 +3,7 @@ import axios from "axios";
 import { Container, Row, Col } from "reactstrap";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import FlightCard from '../components/FlightCard/flightCard'
 
 export const baseSpacexUrl = "https://api.spacexdata.com/v3/launches";
 export default function Home(props) {
@@ -34,7 +35,7 @@ export default function Home(props) {
 
   // console.log(launches);
   const updateActiveFilterState = (selectedFilter, value) => {
-    console.log(key, value);
+    // console.log(key, value);
 
     setActiveFilters(prevState => ({
       ...prevState,
@@ -56,10 +57,58 @@ export default function Home(props) {
     );
   };
   return (
-    <Container>
+    <Container className={styles.ProgramsWindow}>
       <Row xl="12">
         <Col>
-          <h2>Space X Launch Program</h2>
+          <h2>Space X Launch Programs</h2>
+        </Col>
+      </Row>
+      <Row xs="12" sm="12">
+        <Col xs="12" sm="4" md="3">
+          {/* <Filter
+            updateFilter={(key, value) => updateFilterState(key, value)}
+            yearProp={filter.year}
+            launchProp={filter.launch}
+            landingProp={filter.landing}
+          /> */}
+        </Col>
+        <Col xs="12" sm="8" md="9">
+          <Row xs="12" sm="8">
+            {programs &&
+              programs.length > 0 &&
+              programs.map(f => (
+                <Col md="3" sm="6" xs="12" className={styles.padtop}>
+                  <FlightCard
+                    missionName={f.mission_name}
+                    flightNumber={f.flight_number}
+                    imageURL={f.links.mission_patch_small}
+                    missionIds={f.mission_id}
+                    launchYear={f.launch_year}
+                    launchSuccess={
+                      f.launch_success === null
+                        ? ""
+                        : f.launch_success.toString()
+                    }
+                    launchLanding={
+                      f.rocket.first_stage.cores[0].land_success === null
+                        ? ""
+                        : f.rocket.first_stage.cores[0].land_success.toString()
+                    }
+                  />
+                </Col>
+              ))}
+
+            {loading && (
+              <Col>
+                <h4>Loading...........</h4>
+              </Col>
+            )}
+            {!loading && programs.length === 0 && (
+              <Col>
+                <h4>No Data</h4>
+              </Col>
+            )}
+          </Row>
         </Col>
       </Row>
     </Container>

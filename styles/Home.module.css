@@ -120,3 +120,9 @@
     flex-direction: column;
   }
 }
+
+.ProgramsWindow {
+  background-color: rgb(190, 190, 190);
+  height: 100%;
+  width: 100%;
+}
