@@ -1,65 +1,75 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import styles from "../styles/Home.module.css";
+import axios from "axios";
+import { Container, Row, Col } from "reactstrap";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
 
-export default function Home() {
+export const baseSpacexUrl = "https://api.spacexdata.com/v3/launches";
+export default function Home(props) {
+  const router = useRouter();
+  const { land_success, launch_success, launch_year } = router.query;
+  const [launches, setLaunches] = useState(props.launches);
+  const initialFilterState = {
+    launchYear: launch_year ? launch_year : "",
+    launch: launch_success ? launch_success : "",
+    landing: land_success ? land_success : ""
+  };
+  const [activeFilters, setActiveFilters] = useState(initialFilterState);
+  const [programs, setPrograms] = useState(launches);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const yearFilterValue = launch_year ? launch_year : "";
+    const launchFilterValue = launch_success ? launch_success : "";
+    const landingFilterValue = land_success ? land_success : "";
+    setLoading(true);
+    axios
+      .get(
+        `${baseSpacexUrl}?limit=100&launch_year=${yearFilterValue}&launch_success=${launchFilterValue}&land_success=${landingFilterValue}`
+      )
+      .then(result => {
+        setPrograms(result.data);
+        setLoading(false);
+      });
+  }, [land_success, launch_success, launch_year]);
+
+  // console.log(launches);
+  const updateActiveFilterState = (selectedFilter, value) => {
+    console.log(key, value);
+
+    setActiveFilters(prevState => ({
+      ...prevState,
+      [selectedFilter]: value
+    }));
+    const selectedYear =
+      selectedFilter === "year" && value ? value : launch_year;
+    const selectedLanding =
+      selectedFilter === "landing" && value ? value : land_success;
+    const selectedLaunch =
+      selectedFilter === "launch" && value ? value : launch_success;
+
+    router.push(
+      `/?launch_success=${selectedLaunch ? selectedLaunch : ""}&land_success=${
+        selectedLanding ? selectedLanding : ""
+      }&launch_year=${selectedYear ? selectedYear : ""}`,
+      undefined,
+      { shallow: true }
+    );
+  };
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    <Container>
+      <Row xl="12">
+        <Col>
+          <h2>Space X Launch Program</h2>
+        </Col>
+      </Row>
+    </Container>
+  );
+}
+export async function getStaticProps() {
+  const ssoData = await axios.get(`${baseSpacexUrl}?limit=100`);
+  return {
+    props: {
+      launches: ssoData.data
+    }
+  };
 }
