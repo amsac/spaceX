@@ -43,4 +43,4 @@ function FlightCard(props) {
   );
 }
 
-export default FlightCard;
+export default React.memo(FlightCard);
